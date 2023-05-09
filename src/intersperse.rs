@@ -169,7 +169,7 @@ where
     let (lo, hi) = iter.size_hint();
     (
         lo.saturating_add(next_is_elem as usize).saturating_add(lo),
-        hi.and_then(|hi| hi.saturating_add(next_is_elem as usize).checked_add(hi)),
+        hi.map(|hi| hi.saturating_add(next_is_elem as usize).saturating_add(hi)),
     )
 }
 
