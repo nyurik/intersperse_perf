@@ -11,134 +11,80 @@ const ELEMENTS: u32 = 10000;
 // *************************************************************************************************
 //
 
+macro_rules! all_benchmarks {
+    ($name:literal, $intersperse:ident, $intersperse_with:ident, $elements:expr, $g:expr) => {
+        $g.bench_function(concat!("iter ", $name), |b| {
+            b.iter(|| {
+                let mut sum = 0;
+                for v in $elements.iter().$intersperse(&1) {
+                    sum += v;
+                }
+                sum
+            })
+        });
+        $g.bench_function(concat!("opt ", $name), |b| {
+            b.iter(|| {
+                let mut sum = 0;
+                for v in $elements.iter().map(Some).$intersperse(None) {
+                    if let Some(v) = v {
+                        sum += v;
+                    } else {
+                        sum += 1;
+                    }
+                }
+                sum
+            })
+        });
+        $g.bench_function(concat!("opt-unwrap ", $name), |b| {
+            b.iter(|| {
+                let mut sum = 0;
+                for v in $elements.iter().map(Some).$intersperse(None) {
+                    sum += v.unwrap_or(&1);
+                }
+                sum
+            })
+        });
+        $g.bench_function(concat!("with ", $name), |b| {
+            b.iter(|| {
+                let mut sum = 0;
+                for v in $elements.iter().$intersperse_with(|| &1) {
+                    sum += v;
+                }
+                sum
+            })
+        });
+        $g.bench_function(concat!("with-opt ", $name), |b| {
+            b.iter(|| {
+                let mut sum = 0;
+                for v in $elements.iter().map(Some).$intersperse_with(|| None) {
+                    if let Some(v) = v {
+                        sum += v;
+                    } else {
+                        sum += 1;
+                    }
+                }
+                sum
+            })
+        });
+        $g.bench_function(concat!("with-opt-unwrap ", $name), |b| {
+            b.iter(|| {
+                let mut sum = 0;
+                for v in $elements.iter().map(Some).$intersperse_with(|| None) {
+                    sum += v.unwrap_or(&1);
+                }
+                sum
+            })
+        });
+    };
+}
+
 pub fn bench_iters(c: &mut Criterion) {
     let elements = (0..ELEMENTS).collect::<Vec<_>>();
-    let mut g = c.benchmark_group("Sum");
+    let mut g = c.benchmark_group("_");
 
-    g.bench_function("intersperse", |b| {
-        b.iter(|| {
-            let mut sum = 0;
-            for v in elements.iter().intersperse(&1) {
-                sum += v;
-            }
-            sum
-        })
-    });
-    g.bench_function("my_intersperse", |b| {
-        b.iter(|| {
-            let mut sum = 0;
-            for v in elements.iter().my_intersperse(&1) {
-                sum += v;
-            }
-            sum
-        })
-    });
-    g.bench_function("intersperse-opt", |b| {
-        b.iter(|| {
-            let mut sum = 0;
-            for v in elements.iter().map(Some).intersperse(None) {
-                if let Some(v) = v {
-                    sum += v;
-                } else {
-                    sum += 1;
-                }
-            }
-            sum
-        })
-    });
-    g.bench_function("my_intersperse-opt", |b| {
-        b.iter(|| {
-            let mut sum = 0;
-            for v in elements.iter().map(Some).my_intersperse(None) {
-                if let Some(v) = v {
-                    sum += v;
-                } else {
-                    sum += 1;
-                }
-            }
-            sum
-        })
-    });
-    g.bench_function("intersperse-opt-unwrap", |b| {
-        b.iter(|| {
-            let mut sum = 0;
-            for v in elements.iter().map(Some).intersperse(None) {
-                sum += v.unwrap_or(&1);
-            }
-            sum
-        })
-    });
-    g.bench_function("my_intersperse-opt-unwrap", |b| {
-        b.iter(|| {
-            let mut sum = 0;
-            for v in elements.iter().map(Some).my_intersperse(None) {
-                sum += v.unwrap_or(&1);
-            }
-            sum
-        })
-    });
-    g.bench_function("intersperse-with", |b| {
-        b.iter(|| {
-            let mut sum = 0;
-            for v in elements.iter().intersperse_with(|| &1) {
-                sum += v;
-            }
-            sum
-        })
-    });
-    g.bench_function("my_intersperse-with", |b| {
-        b.iter(|| {
-            let mut sum = 0;
-            for v in elements.iter().my_intersperse_with(|| &1) {
-                sum += v;
-            }
-            sum
-        })
-    });
-    g.bench_function("intersperse-with-opt", |b| {
-        b.iter(|| {
-            let mut sum = 0;
-            for v in elements.iter().map(Some).intersperse_with(|| None) {
-                if let Some(v) = v {
-                    sum += v;
-                } else {
-                    sum += 1;
-                }
-            }
-            sum
-        })
-    });
-    g.bench_function("my_intersperse-with-opt", |b| {
-        b.iter(|| {
-            let mut sum = 0;
-            for v in elements.iter().map(Some).my_intersperse_with(|| None) {
-                if let Some(v) = v {
-                    sum += v;
-                } else {
-                    sum += 1;
-                }
-            }
-            sum
-        })
-    });
-    g.bench_function("intersperse-with-opt-unwrap", |b| {
-        b.iter(|| {
-            let mut sum = 0;
-            for v in elements.iter().map(Some).intersperse_with(|| None) {
-                sum += v.unwrap_or(&1);
-            }
-            sum
-        })
-    });
-    g.bench_function("my_intersperse-with-opt-unwrap", |b| {
-        b.iter(|| {
-            let mut sum = 0;
-            for v in elements.iter().map(Some).my_intersperse_with(|| None) {
-                sum += v.unwrap_or(&1);
-            }
-            sum
-        })
-    });
+    all_benchmarks!("000", intersperse, intersperse_with, elements, g);
+    all_benchmarks!("111", my_intersperse, my_intersperse_with, elements, g);
+    all_benchmarks!("222", my_intersperse2, my_intersperse2_with, elements, g);
 
     g.finish();
 }
