@@ -83,8 +83,8 @@ pub fn bench_iters(c: &mut Criterion) {
     let mut g = c.benchmark_group("_");
 
     all_benchmarks!("000", intersperse, intersperse_with, elements, g);
-    all_benchmarks!("111", my_intersperse, my_intersperse_with, elements, g);
-    all_benchmarks!("222", my_intersperse2, my_intersperse2_with, elements, g);
+    all_benchmarks!("111", intersperse1, intersperse1_with, elements, g);
+    all_benchmarks!("222", intersperse2, intersperse2_with, elements, g);
 
     g.finish();
 }

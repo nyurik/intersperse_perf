@@ -1,44 +1,44 @@
-use crate::intersperse::{MyIntersperse, MyIntersperseWith};
-use crate::intersperse2::{MyIntersperseState, MyIntersperseStateWith};
-
 mod intersperse;
 mod intersperse2;
 
+use crate::intersperse::{Intersperse as Intersperse1, IntersperseWith as Intersperse1With};
+use crate::intersperse2::{Intersperse as Intersperse2, IntersperseWith as Intersperse2With};
+
 pub trait IteratorExt: Iterator {
     #[inline]
-    fn my_intersperse(self, separator: Self::Item) -> MyIntersperse<Self>
+    fn intersperse1(self, separator: Self::Item) -> Intersperse1<Self>
     where
         Self: Sized,
         Self::Item: Clone,
     {
-        MyIntersperse::new(self, separator)
+        Intersperse1::new(self, separator)
     }
 
     #[inline]
-    fn my_intersperse_with<G>(self, separator: G) -> MyIntersperseWith<Self, G>
+    fn intersperse1_with<G>(self, separator: G) -> Intersperse1With<Self, G>
     where
         Self: Sized,
         G: FnMut() -> Self::Item,
     {
-        MyIntersperseWith::new(self, separator)
+        Intersperse1With::new(self, separator)
     }
 
     #[inline]
-    fn my_intersperse2(self, separator: Self::Item) -> MyIntersperseState<Self>
+    fn intersperse2(self, separator: Self::Item) -> Intersperse2<Self>
     where
         Self: Sized,
         Self::Item: Clone,
     {
-        MyIntersperseState::new(self, separator)
+        Intersperse2::new(self, separator)
     }
 
     #[inline]
-    fn my_intersperse2_with<G>(self, separator: G) -> MyIntersperseStateWith<Self, G>
+    fn intersperse2_with<G>(self, separator: G) -> Intersperse2With<Self, G>
     where
         Self: Sized,
         G: FnMut() -> Self::Item,
     {
-        MyIntersperseStateWith::new(self, separator)
+        Intersperse2With::new(self, separator)
     }
 }
 
@@ -51,18 +51,18 @@ mod tests {
     #[test]
     fn test_my_intersperse() {
         let v: Vec<i32> = Vec::new();
-        let mut it = v.iter().my_intersperse(&0);
+        let mut it = v.iter().intersperse1(&0);
         assert_eq!(it.next(), None);
         assert_eq!(it.next(), None);
 
         let v = vec![1];
-        let mut it = v.iter().my_intersperse(&0);
+        let mut it = v.iter().intersperse1(&0);
         assert_eq!(it.next(), Some(&1));
         assert_eq!(it.next(), None);
         assert_eq!(it.next(), None);
 
         let v = vec![1, 2];
-        let mut it = v.iter().my_intersperse(&0);
+        let mut it = v.iter().intersperse1(&0);
         assert_eq!(it.next(), Some(&1));
         assert_eq!(it.next(), Some(&0));
         assert_eq!(it.next(), Some(&2));
@@ -70,7 +70,7 @@ mod tests {
         assert_eq!(it.next(), None);
 
         let v = vec![1, 2, 3];
-        let mut it = v.iter().my_intersperse(&0);
+        let mut it = v.iter().intersperse1(&0);
         assert_eq!(it.next(), Some(&1));
         assert_eq!(it.next(), Some(&0));
         assert_eq!(it.next(), Some(&2));
@@ -82,11 +82,11 @@ mod tests {
 
     #[test]
     fn test_intersperse_size_hint() {
-        let iter = std::iter::empty::<i32>().my_intersperse(0);
+        let iter = std::iter::empty::<i32>().intersperse1(0);
         assert_eq!(iter.size_hint(), (0, Some(0)));
 
         let xs = ["a", "", "b", "c"];
-        let mut iter = xs.iter().map(|x| *x).my_intersperse(", ");
+        let mut iter = xs.iter().map(|x| *x).intersperse1(", ");
         assert_eq!(iter.size_hint(), (7, Some(7)));
 
         assert_eq!(iter.next(), Some("a"));
@@ -94,24 +94,24 @@ mod tests {
         assert_eq!(iter.next(), Some(", "));
         assert_eq!(iter.size_hint(), (5, Some(5)));
 
-        assert_eq!([].iter().my_intersperse(&()).size_hint(), (0, Some(0)));
+        assert_eq!([].iter().intersperse1(&()).size_hint(), (0, Some(0)));
     }
 
     #[test]
     fn test_my_intersperse2() {
         let v: Vec<i32> = Vec::new();
-        let mut it = v.iter().my_intersperse(&0);
+        let mut it = v.iter().intersperse1(&0);
         assert_eq!(it.next(), None);
         assert_eq!(it.next(), None);
 
         let v = vec![1];
-        let mut it = v.iter().my_intersperse(&0);
+        let mut it = v.iter().intersperse1(&0);
         assert_eq!(it.next(), Some(&1));
         assert_eq!(it.next(), None);
         assert_eq!(it.next(), None);
 
         let v = vec![1, 2];
-        let mut it = v.iter().my_intersperse(&0);
+        let mut it = v.iter().intersperse1(&0);
         assert_eq!(it.next(), Some(&1));
         assert_eq!(it.next(), Some(&0));
         assert_eq!(it.next(), Some(&2));
@@ -119,7 +119,7 @@ mod tests {
         assert_eq!(it.next(), None);
 
         let v = vec![1, 2, 3];
-        let mut it = v.iter().my_intersperse(&0);
+        let mut it = v.iter().intersperse1(&0);
         assert_eq!(it.next(), Some(&1));
         assert_eq!(it.next(), Some(&0));
         assert_eq!(it.next(), Some(&2));
@@ -131,11 +131,11 @@ mod tests {
 
     #[test]
     fn test_intersperse_size_hint2() {
-        let iter = std::iter::empty::<i32>().my_intersperse(0);
+        let iter = std::iter::empty::<i32>().intersperse1(0);
         assert_eq!(iter.size_hint(), (0, Some(0)));
 
         let xs = ["a", "", "b", "c"];
-        let mut iter = xs.iter().map(|x| *x).my_intersperse(", ");
+        let mut iter = xs.iter().map(|x| *x).intersperse1(", ");
         assert_eq!(iter.size_hint(), (7, Some(7)));
 
         assert_eq!(iter.next(), Some("a"));
@@ -143,6 +143,6 @@ mod tests {
         assert_eq!(iter.next(), Some(", "));
         assert_eq!(iter.size_hint(), (5, Some(5)));
 
-        assert_eq!([].iter().my_intersperse(&()).size_hint(), (0, Some(0)));
+        assert_eq!([].iter().intersperse1(&()).size_hint(), (0, Some(0)));
     }
 }

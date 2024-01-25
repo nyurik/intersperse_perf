@@ -5,7 +5,7 @@ use core::iter::{Fuse, FusedIterator};
 /// This `struct` is created by [`Iterator::intersperse`]. See its documentation
 /// for more information.
 #[derive(Debug, Clone)]
-pub struct MyIntersperseState<I: Iterator>
+pub struct Intersperse<I: Iterator>
 where
     I::Item: Clone,
 {
@@ -15,14 +15,14 @@ where
     iter: Fuse<I>,
 }
 
-impl<I> FusedIterator for MyIntersperseState<I>
+impl<I> FusedIterator for Intersperse<I>
 where
     I: FusedIterator,
     I::Item: Clone,
 {
 }
 
-impl<I: Iterator> MyIntersperseState<I>
+impl<I: Iterator> Intersperse<I>
 where
     I::Item: Clone,
 {
@@ -36,7 +36,7 @@ where
     }
 }
 
-impl<I> Iterator for MyIntersperseState<I>
+impl<I> Iterator for Intersperse<I>
 where
     I: Iterator,
     I::Item: Clone,
@@ -87,7 +87,7 @@ where
 ///
 /// This `struct` is created by [`Iterator::intersperse_with`]. See its
 /// documentation for more information.
-pub struct MyIntersperseStateWith<I, G>
+pub struct IntersperseWith<I, G>
 where
     I: Iterator,
 {
@@ -97,14 +97,14 @@ where
     iter: Fuse<I>,
 }
 
-impl<I, G> FusedIterator for MyIntersperseStateWith<I, G>
+impl<I, G> FusedIterator for IntersperseWith<I, G>
 where
     I: FusedIterator,
     G: FnMut() -> I::Item,
 {
 }
 
-impl<I, G> Clone for MyIntersperseStateWith<I, G>
+impl<I, G> Clone for IntersperseWith<I, G>
 where
     I: Iterator + Clone,
     I::Item: Clone,
@@ -120,7 +120,7 @@ where
     }
 }
 
-impl<I, G> MyIntersperseStateWith<I, G>
+impl<I, G> IntersperseWith<I, G>
 where
     I: Iterator,
     G: FnMut() -> I::Item,
@@ -135,7 +135,7 @@ where
     }
 }
 
-impl<I, G> Iterator for MyIntersperseStateWith<I, G>
+impl<I, G> Iterator for IntersperseWith<I, G>
 where
     I: Iterator,
     G: FnMut() -> I::Item,
