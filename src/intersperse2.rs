@@ -60,7 +60,7 @@ where
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        intersperse_size_hint(&self.iter, self.next_item.is_some())
+        intersperse_size_hint(&self.iter, self.started, self.next_item.is_some())
     }
 
     fn fold<B, F>(self, init: B, f: F) -> B
@@ -69,7 +69,14 @@ where
         F: FnMut(B, Self::Item) -> B,
     {
         let separator = self.separator;
-        intersperse_fold(self.iter, init, f, move || separator.clone(), self.next_item)
+        intersperse_fold(
+            self.iter,
+            init,
+            f,
+            move || separator.clone(),
+            self.started,
+            self.next_item,
+        )
     }
 }
 
@@ -161,10 +168,15 @@ where
             self.started = true;
             self.iter.next()
         }
+        // !started && none: 2*iter-1
+        // started && none: 2*iter
+        // started && some: 2*iter-1
+
+        // !started || some
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        intersperse_size_hint(&self.iter, self.next_item.is_some())
+        intersperse_size_hint(&self.iter, self.started, self.next_item.is_some())
     }
 
     fn fold<B, F>(self, init: B, f: F) -> B
@@ -172,26 +184,33 @@ where
         Self: Sized,
         F: FnMut(B, Self::Item) -> B,
     {
-        intersperse_fold(self.iter, init, f, self.separator, self.next_item)
+        intersperse_fold(self.iter, init, f, self.separator, self.started, self.next_item)
     }
 }
 
-fn intersperse_size_hint<I>(iter: &I, next_is_elem: bool) -> (usize, Option<usize>)
+fn intersperse_size_hint<I>(iter: &I, started: bool, next_is_some: bool) -> (usize, Option<usize>)
 where
     I: Iterator,
 {
     let (lo, hi) = iter.size_hint();
     (
-        lo.saturating_add(next_is_elem as usize).saturating_add(lo),
-        hi.map(|hi| hi.saturating_add(next_is_elem as usize).saturating_add(hi)),
+        lo.saturating_sub(!started as usize)
+            .saturating_add(next_is_some as usize)
+            .saturating_add(lo),
+        hi.map(|hi| {
+            hi.saturating_sub(!started as usize)
+                .saturating_add(next_is_some as usize)
+                .saturating_add(hi)
+        }),
     )
 }
 
 fn intersperse_fold<I, B, F, G>(
-    iter: I,
+    mut iter: I,
     init: B,
     mut f: F,
     mut separator: G,
+    started: bool,
     mut next_item: Option<I::Item>,
 ) -> B
 where
@@ -201,7 +220,8 @@ where
 {
     let mut accum = init;
 
-    if let Some(x) = next_item.take() {
+    let first = if started { next_item.take() } else { iter.next() };
+    if let Some(x) = first {
         accum = f(accum, x);
     }
 
