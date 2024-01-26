@@ -168,11 +168,6 @@ where
             self.started = true;
             self.iter.next()
         }
-        // !started && none: 2*iter-1
-        // started && none: 2*iter
-        // started && some: 2*iter-1
-
-        // !started || some
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -197,10 +192,10 @@ where
         lo.saturating_sub(!started as usize)
             .saturating_add(next_is_some as usize)
             .saturating_add(lo),
-        hi.map(|hi| {
+        hi.and_then(|hi| {
             hi.saturating_sub(!started as usize)
                 .saturating_add(next_is_some as usize)
-                .saturating_add(hi)
+                .checked_add(hi)
         }),
     )
 }
