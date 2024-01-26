@@ -1,3 +1,4 @@
+use core::fmt;
 use core::iter::{Fuse, FusedIterator};
 
 /// An iterator adapter that places a separator between all elements.
@@ -27,11 +28,7 @@ where
 {
     pub fn new(iter: I, separator: I::Item) -> Self {
         let mut iter = iter.fuse();
-        Self {
-            separator,
-            next_item: iter.next(),
-            iter,
-        }
+        Self { separator, next_item: iter.next(), iter }
     }
 }
 
@@ -67,13 +64,7 @@ where
         F: FnMut(B, Self::Item) -> B,
     {
         let separator = self.separator;
-        intersperse_fold(
-            self.iter,
-            init,
-            f,
-            move || separator.clone(),
-            self.next_item,
-        )
+        intersperse_fold(self.iter, init, f, move || separator.clone(), self.next_item)
     }
 }
 
@@ -95,6 +86,21 @@ where
     I: FusedIterator,
     G: FnMut() -> I::Item,
 {
+}
+
+impl<I, G> fmt::Debug for IntersperseWith<I, G>
+where
+    I: Iterator + fmt::Debug,
+    I::Item: fmt::Debug,
+    G: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("IntersperseWith")
+            .field("separator", &self.separator)
+            .field("iter", &self.iter)
+            .field("next_item", &self.next_item)
+            .finish()
+    }
 }
 
 impl<I, G> Clone for IntersperseWith<I, G>
@@ -119,11 +125,7 @@ where
 {
     pub fn new(iter: I, separator: G) -> Self {
         let mut iter = iter.fuse();
-        Self {
-            separator,
-            next_item: iter.next(),
-            iter,
-        }
+        Self { separator, next_item: iter.next(), iter }
     }
 }
 
