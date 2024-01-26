@@ -49,7 +49,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_my_intersperse() {
+    fn test_intersperse() {
         let v: Vec<i32> = Vec::new();
         let mut it = v.iter().intersperse1(&0);
         assert_eq!(it.next(), None);
@@ -98,20 +98,20 @@ mod tests {
     }
 
     #[test]
-    fn test_my_intersperse2() {
+    fn test_intersperse2() {
         let v: Vec<i32> = Vec::new();
-        let mut it = v.iter().intersperse1(&0);
+        let mut it = v.iter().intersperse2(&0);
         assert_eq!(it.next(), None);
         assert_eq!(it.next(), None);
 
         let v = vec![1];
-        let mut it = v.iter().intersperse1(&0);
+        let mut it = v.iter().intersperse2(&0);
         assert_eq!(it.next(), Some(&1));
         assert_eq!(it.next(), None);
         assert_eq!(it.next(), None);
 
         let v = vec![1, 2];
-        let mut it = v.iter().intersperse1(&0);
+        let mut it = v.iter().intersperse2(&0);
         assert_eq!(it.next(), Some(&1));
         assert_eq!(it.next(), Some(&0));
         assert_eq!(it.next(), Some(&2));
@@ -119,7 +119,7 @@ mod tests {
         assert_eq!(it.next(), None);
 
         let v = vec![1, 2, 3];
-        let mut it = v.iter().intersperse1(&0);
+        let mut it = v.iter().intersperse2(&0);
         assert_eq!(it.next(), Some(&1));
         assert_eq!(it.next(), Some(&0));
         assert_eq!(it.next(), Some(&2));
@@ -131,11 +131,11 @@ mod tests {
 
     #[test]
     fn test_intersperse_size_hint2() {
-        let iter = std::iter::empty::<i32>().intersperse1(0);
+        let iter = std::iter::empty::<i32>().intersperse2(0);
         assert_eq!(iter.size_hint(), (0, Some(0)));
 
         let xs = ["a", "", "b", "c"];
-        let mut iter = xs.iter().map(|x| *x).intersperse1(", ");
+        let mut iter = xs.iter().map(|x| *x).intersperse2(", ");
         assert_eq!(iter.size_hint(), (7, Some(7)));
 
         assert_eq!(iter.next(), Some("a"));
@@ -143,6 +143,6 @@ mod tests {
         assert_eq!(iter.next(), Some(", "));
         assert_eq!(iter.size_hint(), (5, Some(5)));
 
-        assert_eq!([].iter().intersperse1(&()).size_hint(), (0, Some(0)));
+        assert_eq!([].iter().intersperse2(&()).size_hint(), (0, Some(0)));
     }
 }
